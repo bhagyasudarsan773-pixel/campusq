@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CampusQ — Whole-College AI Timetable &amp; Academic Scheduling Studio</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <!-- Soft Pastel Mesh & Dot-Matrix Background -->
+    <div class="bg-canvas" aria-hidden="true">
+      <div class="bg-orb bg-orb-1"></div>
+      <div class="bg-orb bg-orb-2"></div>
+      <div class="bg-orb bg-orb-3"></div>
+      <div class="bg-grid-overlay"></div>
+    </div>
+
+    <div class="studio-shell">
+      <!-- =========================================================
+           TIER 1: FLOATING ACADEMIC MASTHEAD (BRAND + TELEMETRY + GLOBAL FILTERS)
+           ========================================================= -->
+      <header class="studio-masthead">
+        <div class="masthead-inner">
+          <!-- Brand Identity -->
+          <div class="brand-group" id="brandHomeBtn">
+            <div class="brand-logo">CQ</div>
+            <div class="brand-title">
+              <h1>CampusQ</h1>
+            </div>
+          </div>
+
+          <!-- Live Health & Clash Telemetry Chips -->
+          <div class="status-pills-row">
+            <div class="status-pill-card" data-nav-view="timetable" title="Open Weekly Timetable">
+              <span class="status-dot status-dot-emerald"></span>
+              <span class="status-pill-label">Health:</span>
+              <strong id="kpiHealthValue" style="color: #10b981;">100%</strong>
+              <span id="kpiHealthBadge" class="pill-tag pill-success">OK</span>
+            </div>
+
+            <div class="status-pill-card" data-nav-view="conflicts" title="Inspect Faculty Clashes">
+              <span>👨‍🏫 Faculty:</span>
+              <strong id="kpiFacultyCount">0</strong>
+            </div>
+
+            <div class="status-pill-card" data-nav-view="conflicts" title="Inspect Room & Lab Clashes">
+              <span>🏫 Room/Lab:</span>
+              <strong id="kpiRoomCount">0</strong>
+            </div>
+
+            <div class="status-pill-card" data-nav-view="conflicts" title="Inspect Batch Clashes">
+              <span>🎓 Batch:</span>
+              <strong id="kpiBatchCount">0</strong>
+            </div>
+          </div>
+
+          <!-- Global Scenario, Dept & Semester Bar + Auto-Fix CTA -->
+          <div class="global-filters-row">
+            <div class="compact-filter">
+              <label for="scenarioDropdown">🧪</label>
+              <select id="scenarioDropdown" class="preset-select" title="Select Demo Test Case or Scenario">
+                <option value="whole-college-conflict" selected>🏛️ TC-05: Whole College (9 Depts + Clashes)</option>
+                <option value="tc-faculty-clash">👨‍🏫 TC-01: Faculty Double-Booking Clash</option>
+                <option value="tc-room-capacity">🏫 TC-02: Room Double-Booking &amp; Seat Overflow</option>
+                <option value="tc-lab-mismatch">💻 TC-03: Engineering &amp; Computer Lab Mismatch</option>
+                <option value="tc-batch-clash">🎓 TC-04: Student Cohort Simultaneous Clash</option>
+                <option value="simple-example">1️⃣ Quick Demo: Mon 9 AM Clash (3 Classes)</option>
+                <option value="default-conflict">2️⃣ CSE &amp; IT Clashes</option>
+                <option value="clean-optimized">✅ TC-06: 100% Conflict-Free Baseline</option>
+                <option value="empty">🧹 Empty Timetable (Custom Input)</option>
+              </select>
+            </div>
+
+            <div class="compact-filter">
+              <label for="topDeptDropdown">🎓</label>
+              <select id="topDeptDropdown" class="preset-select" title="Filter by Department"></select>
+            </div>
+
+            <div class="compact-filter">
+              <label for="topSemDropdown">📚</label>
+              <select id="topSemDropdown" class="preset-select" title="Filter by Semester">
+                <option value="ALL">All (S1–S8)</option>
+                <option value="1">S1</option>
+                <option value="2">S2</option>
+                <option value="3">S3</option>
+                <option value="4">S4</option>
+                <option value="5">S5</option>
+                <option value="6">S6</option>
+                <option value="7">S7</option>
+                <option value="8">S8</option>
+              </select>
+            </div>
+
+            <!-- Hidden compatibility elements -->
+            <div id="navDepartmentsMenu" style="display: none;"></div>
+            <select id="headerFacilitySelect" style="display: none;">
+              <option value="home">Home</option>
+            </select>
+
+            <button id="btnOptimize" class="btn btn-primary btn-glow">
+              <span>✨ Auto-Fix Clashes</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- =========================================================
+           TIER 2: FLOATING PILL RIBBON (12 DEDICATED SINGLE-FEATURE PAGES)
+           ========================================================= -->
+      <div class="studio-dock-wrap">
+        <nav class="studio-pill-dock" aria-label="Feature Pages">
+          <button type="button" class="dock-pill active" data-nav-view="home">
+            <span class="dock-pill-icon">🏠</span>
+            <span>Overview</span>
+          </button>
+
+          <button type="button" class="dock-pill" data-nav-view="scenarios">
+            <span class="dock-pill-icon">🧪</span>
+            <span>Demo Test Cases</span>
+          </button>
+
+          <button type="button" class="dock-pill" data-nav-view="timetable">
+            <span class="dock-pill-icon">📅</span>
+            <span>Timetable Grid</span>
+          </button>
+
+          <button type="button" class="dock-pill" data-nav-view="builder">
+            <span class="dock-pill-icon">✏️</span>
+            <span>Add Class</span>
+          </button>
+
+          <button type="button" class="dock-pill" data-nav-view="register-resources">
+            <span class="dock-pill-icon">➕</span>
+            <span>Add Resources</span>
+          </button>
+
+          <button type="button" class="dock-pill" data-nav-view="departments">
+            <span class="dock-pill-icon">🎓</span>
+            <span>Departments (<span id="navDeptCount">9</span>)</span>
+          </button>
+
+          <div class="dock-divider"></div>
+
+          <button type="button" class="dock-pill" data-nav-view="conflicts">
+            <span class="dock-pill-icon">🚨</span>
+            <span>Clashes</span>
+            <span class="dock-badge" id="navConflictCount">0</span>
+          </button>
+
+          <button type="button" class="dock-pill" data-nav-view="fix-plan">
+            <span class="dock-pill-icon">🔧</span>
+            <span>Fix Plan</span>
+          </button>
+
+          <button type="button" class="dock-pill" data-nav-view="graph">
+            <span class="dock-pill-icon">🕸️</span>
+            <span>Clash Graph</span>
+          </button>
+
+          <div class="dock-divider"></div>
+
+          <button type="button" class="dock-pill" data-nav-view="ai-assistant">
+            <span class="dock-pill-icon">🤖</span>
+            <span>AI Chat</span>
+          </button>
+
+          <button type="button" class="dock-pill" data-nav-view="ai-summary">
+            <span class="dock-pill-icon">⚡</span>
+            <span>AI Report</span>
+          </button>
+
+          <div class="dock-divider"></div>
+
+          <button type="button" class="dock-pill" data-nav-view="dir-faculty">
+            <span class="dock-pill-icon">👨‍🏫</span>
+            <span>Faculty</span>
+          </button>
+
+          <button type="button" class="dock-pill" data-nav-view="dir-rooms">
+            <span class="dock-pill-icon">🏫</span>
+            <span>Rooms &amp; Labs</span>
+          </button>
+
+          <button type="button" class="dock-pill" data-nav-view="dir-batches">
+            <span class="dock-pill-icon">👥</span>
+            <span>Batches</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- =========================================================
+           TIER 3: DEDICATED SINGLE-FEATURE STAGE
+           ========================================================= -->
+      <main class="studio-stage">
+        <!-- =========================================================
+             PAGE 1: OVERVIEW (#view-home)
+             ========================================================= -->
+        <section id="view-home" class="view-section active">
+          <div class="studio-feature-card">
+            <div class="studio-hero-banner">
+              <div class="studio-hero-left">
+                <span class="studio-tag">⚡ MULTI-DEPARTMENT AI ACADEMIC SCHEDULER</span>
+                <h2>
+                  One Dedicated Page for <span class="text-gradient">Every Scheduling Feature</span>
+                </h2>
+                <p>
+                  Manage classes across <strong>9 college departments</strong> and <strong>8 semesters (S1–S8)</strong> without visual clutter. Run pre-built <strong>🧪 Demo Test Cases</strong> or jump to any dedicated workspace below.
+                </p>
+                <div class="hero-cta-group" style="margin-top: 1.25rem;">
+                  <button type="button" class="btn btn-primary btn-lg btn-glow" data-nav-view="scenarios">
+                    🧪 Run Demo Test Cases
+                  </button>
+                  <button type="button" class="btn btn-secondary btn-lg" data-nav-view="timetable">
+                    📅 Open Timetable Grid
+                  </button>
+                  <button type="button" class="btn btn-qualcomm btn-lg" id="heroQuickOptimizeBtn">
+                    ✨ 1-Click Auto-Fix Clashes
+                  </button>
+                </div>
+              </div>
+
+              <div class="studio-kpi-bento">
+                <div class="bento-stat" data-nav-view="departments">
+                  <span class="bento-icon">🎓</span>
+                  <strong id="heroStatDepts">9</strong>
+                  <span>Departments</span>
+                </div>
+                <div class="bento-stat" data-nav-view="timetable">
+                  <span class="bento-icon">📚</span>
+                  <strong>S1–S8</strong>
+                  <span>Semesters</span>
+                </div>
+                <div class="bento-stat" data-nav-view="dir-faculty">
+                  <span class="bento-icon">👨‍🏫</span>
+                  <strong id="heroStatFaculty">18+</strong>
+                  <span>Faculty</span>
+                </div>
+                <div class="bento-stat" data-nav-view="dir-rooms">
+                  <span class="bento-icon">🏫</span>
+                  <strong id="heroStatRooms">12+</strong>
+                  <span>Rooms &amp; Labs</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="studio-Launcher-section">
+              <div class="studio-section-title">
+                <span>🧭 Explore Dedicated Feature Workspaces</span>
+                <span class="pill-tag pill-info">Click any card to open its page</span>
+              </div>
+
+              <div class="home-launchpad-grid">
+                <div class="launchpad-card" data-nav-view="timetable">
+                  <div class="tile-icon tile-blue">📅</div>
+                  <div>
+                    <strong>1. Weekly Timetable Grid</strong>
+                    <p>Full-screen interactive weekly matrix with Department, Semester (S1–S8), Faculty &amp; Room filters.</p>
+                  </div>
+                </div>
+
+                <div class="launchpad-card" data-nav-view="builder">
+                  <div class="tile-icon tile-purple">✏️</div>
+                  <div>
+                    <strong>2. Add Class to Timetable</strong>
+                    <p>Dedicated 8-step class scheduler with custom inline subject, faculty, batch, and room creation.</p>
+                  </div>
+                </div>
+
+                <div class="launchpad-card" data-nav-view="register-resources">
+                  <div class="tile-icon tile-emerald">➕</div>
+                  <div>
+                    <strong>3. Register New Resources</strong>
+                    <p>Dedicated onboarding studio for new Faculty, Courses (S1–S8), Classrooms/Labs &amp; Batches.</p>
+                  </div>
+                </div>
+
+                <div class="launchpad-card" data-nav-view="conflicts">
+                  <div class="tile-icon tile-rose">🚨</div>
+                  <div>
+                    <strong>4. Conflict Radar</strong>
+                    <p>Inspect real-time faculty double-bookings, room capacity overflows, and lab mismatches.</p>
+                  </div>
+                </div>
+
+                <div class="launchpad-card" data-nav-view="fix-plan">
+                  <div class="tile-icon tile-amber">🔧</div>
+                  <div>
+                    <strong>5. Before → After Fix Plan</strong>
+                    <p>Review exact slot and room reassignments computed by the AI solver and apply in one click.</p>
+                  </div>
+                </div>
+
+                <div class="launchpad-card" data-nav-view="ai-assistant">
+                  <div class="tile-icon tile-cyan">🤖</div>
+                  <div>
+                    <strong>6. AI Chat Assistant</strong>
+                    <p>Ask natural-language questions about any faculty member, department, semester, or clash.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="studio-page-footer-nav">
+              <span>Step 1 of 12 • Platform Overview</span>
+              <button type="button" class="btn btn-primary" data-nav-view="timetable">
+                Next: Weekly Timetable Grid →
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             PAGE 2: WEEKLY TIMETABLE GRID (#view-timetable)
+             ========================================================= -->
+        <section id="view-timetable" class="view-section">
+          <div class="studio-feature-card">
+            <div class="cloud-page-header-row">
+              <div>
+                <span class="section-eyebrow">WORKSPACE 02 • MASTER SCHEDULE</span>
+                <h2>📅 Whole-College Weekly Timetable Grid</h2>
+                <p>Click any scheduled class card to edit/delete it, or click any empty slot cell to schedule a class in that slot.</p>
+              </div>
+              <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+                <button type="button" class="btn btn-primary" data-nav-view="builder">
+                  ✏️ + Add Class
+                </button>
+                <button type="button" id="btnExportCsv" class="btn btn-secondary">
+                  📥 Export CSV
+                </button>
+                <button type="button" id="btnPrintSchedule" class="btn btn-secondary">
+                  🖨️ Print PDF
+                </button>
+              </div>
+            </div>
+
+            <!-- Live Conflict Alert Banner -->
+            <div id="liveConflictBanner" class="live-conflict-banner" style="display: none;">
+              <div class="conflict-banner-info">
+                <div class="conflict-banner-headline" id="bannerConflictHeadline">
+                  🚨 Conflicts Detected Across Campus Timetable!
+                </div>
+                <div class="conflict-banner-sub" id="bannerConflictList"></div>
+              </div>
+
+              <div class="conflict-banner-actions">
+                <button type="button" id="btnViewConflictDetails" class="btn btn-secondary">
+                  🔍 View Detected Clashes
+                </button>
+                <button type="button" id="btnBannerFixNow" class="btn btn-primary btn-glow">
+                  ✨ Auto-Fix All Conflicts
+                </button>
+              </div>
+            </div>
+
+            <!-- Filter Bar -->
+            <div class="matrix-filter-bar" id="timetableMatrixSection">
+              <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
+                <span id="activeFilterLabel" class="pill-tag pill-info">Showing: All College Departments (S1–S8)</span>
+                <button id="btnClearFilter" class="chip-btn" style="display: none;">✕ Reset Filter</button>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
+                <select id="filterTypeSelect" class="preset-select" style="width: auto;">
+                  <option value="ALL">Filter Grid: All College Classes</option>
+                  <option value="DEPT">Filter by Department</option>
+                  <option value="SEM">Filter by Semester (S1–S8)</option>
+                  <option value="BATCH">Filter by Student Batch</option>
+                  <option value="FACULTY">Filter by Faculty Member</option>
+                  <option value="ROOM">Filter by Classroom / Lab</option>
+                </select>
+                <select id="filterEntitySelect" class="preset-select" style="width: auto; display: none;"></select>
+              </div>
+            </div>
+
+            <div class="timetable-wrapper">
+              <table class="timetable-table" id="timetableGrid">
+                <thead>
+                  <tr>
+                    <th class="th-time">Time Slot</th>
+                    <th>Monday</th>
+                    <th>Tuesday</th>
+                    <th>Wednesday</th>
+                    <th>Thursday</th>
+                    <th>Friday</th>
+                  </tr>
+                </thead>
+                <tbody id="timetableBody"></tbody>
+              </table>
+            </div>
+
+            <div class="studio-page-footer-nav">
+              <button type="button" class="btn btn-secondary" data-nav-view="home">
+                ← Back: Overview
+              </button>
+              <button type="button" class="btn btn-primary" data-nav-view="builder">
+                Next: Add Class to Timetable →
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             PAGE 3: ADD CLASS TO TIMETABLE (#view-builder)
+             ========================================================= -->
+        <section id="view-builder" class="view-section">
+          <div class="studio-feature-card" id="builderCardSection">
+            <div class="cloud-page-header-row">
+              <div>
+                <span class="section-eyebrow">WORKSPACE 03 • SCHEDULE BUILDER</span>
+                <h2>✏️ Add Class to Timetable (8-Step Input)</h2>
+                <p>
+                  Select Department, Semester (S1–S8), Subject, Faculty, Batch, and Classroom/Lab—or pick <strong>"➕ Type New..."</strong> in any dropdown to create a new entry inline.
+                </p>
+              </div>
+              <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+                <button type="button" class="btn btn-secondary" data-nav-view="register-resources">
+                  ➕ Register New Faculty / Room
+                </button>
+                <button type="button" id="btnClearTimetableInline" class="btn btn-danger-outline">
+                  🧹 Start Empty Timetable
+                </button>
+              </div>
+            </div>
+
+            <!-- Hidden compatibility toggles -->
+            <button type="button" id="subtabScheduleClassBtn" style="display: none;"></button>
+            <button type="button" id="btnToggleQuickAddPanel" style="display: none;"></button>
+
+            <div id="scheduleClassSubPanel">
+              <form id="inlineBuilderForm" class="builder-grid-structured" style="padding: 0.5rem 0 0 0;">
+                <!-- Step 1: Department & Semester -->
+                <div class="builder-field">
+                  <label for="inDept"><span class="step-num">01</span> Department &amp; Semester</label>
+                  <div class="field-split">
+                    <select id="inDept" class="preset-select" style="flex: 1.4;"></select>
+                    <select id="inSem" class="preset-select" style="width: 92px; flex: none;" title="Select Semester (S1-S8)">
+                      <option value="ALL">All Sem</option>
+                      <option value="1">S1</option>
+                      <option value="2">S2</option>
+                      <option value="3">S3</option>
+                      <option value="4">S4</option>
+                      <option value="5">S5</option>
+                      <option value="6">S6</option>
+                      <option value="7">S7</option>
+                      <option value="8">S8</option>
+                    </select>
+                  </div>
+                  <input
+                    type="text"
+                    id="inDeptCustom"
+                    class="input-field custom-inline-input"
+                    placeholder="Type New Department Name..."
+                    style="display: none;"
+                  />
+                </div>
+
+                <!-- Step 2: Subject -->
+                <div class="builder-field">
+                  <label for="inSubject"><span class="step-num">02</span> Subject / Course</label>
+                  <select id="inSubject" class="preset-select"></select>
+                  <input
+                    type="text"
+                    id="inSubjectCustom"
+                    class="input-field custom-inline-input"
+                    placeholder="Type New Subject Title..."
+                    style="display: none;"
+                  />
+                </div>
+
+                <!-- Step 3: Room Facility Needed -->
+                <div class="builder-field">
+                  <label for="inRoomType"><span class="step-num">03</span> Facility Type Required</label>
+                  <select id="inRoomType" class="preset-select">
+                    <option value="LECTURE">🏫 Regular Lecture Hall</option>
+                    <option value="COMPUTER_LAB">💻 Computer / Engineering Lab</option>
+                  </select>
+                </div>
+
+                <!-- Step 4: Faculty (Teacher) -->
+                <div class="builder-field">
+                  <label for="inTeacher"><span class="step-num">04</span> Faculty Member</label>
+                  <select id="inTeacher" class="preset-select"></select>
+                  <input
+                    type="text"
+                    id="inTeacherCustom"
+                    class="input-field custom-inline-input"
+                    placeholder="Type New Faculty Name..."
+                    style="display: none;"
+                  />
+                </div>
+
+                <!-- Step 5: Student Batch & Size -->
+                <div class="builder-field">
+                  <label for="inBatch"><span class="step-num">05</span> Student Batch &amp; Strength</label>
+                  <select id="inBatch" class="preset-select"></select>
+                  <div id="inBatchCustomWrap" class="custom-inline-row" style="display: none;">
+                    <input
+                      type="text"
+                      id="inBatchCustom"
+                      class="input-field"
+                      placeholder="New Batch Name..."
+                      style="flex: 1.4;"
+                    />
+                    <input
+                      type="number"
+                      id="inBatchSizeCustom"
+                      class="input-field"
+                      placeholder="Size"
+                      value="60"
+                      style="width: 75px;"
+                    />
+                  </div>
+                </div>
+
+                <!-- Step 6: Classroom / Lab -->
+                <div class="builder-field">
+                  <label for="inRoom"><span class="step-num">06</span> Classroom / Lab</label>
+                  <select id="inRoom" class="preset-select"></select>
+                  <div id="inRoomCustomWrap" class="custom-inline-row" style="display: none;">
+                    <input
+                      type="text"
+                      id="inRoomCustom"
+                      class="input-field"
+                      placeholder="New Room Name..."
+                      style="flex: 1.4;"
+                    />
+                    <input
+                      type="number"
+                      id="inRoomCapCustom"
+                      class="input-field"
+                      placeholder="Seats"
+                      value="60"
+                      style="width: 75px;"
+                    />
+                  </div>
+                </div>
+
+                <!-- Step 7: Day & Time Slot -->
+                <div class="builder-field">
+                  <label for="inDay"><span class="step-num">07</span> Day &amp; Time Slot</label>
+                  <div class="field-split">
+                    <select id="inDay" class="preset-select" style="flex: 1;" required></select>
+                    <select id="inSlot" class="preset-select" style="flex: 1.25;" required></select>
+                  </div>
+                </div>
+
+                <!-- Step 8: Submit -->
+                <div class="builder-field builder-submit-col">
+                  <label><span class="step-num">08</span> Add to Live Timetable</label>
+                  <button type="submit" class="btn btn-primary btn-glow builder-submit-btn">
+                    ➕ Add Class to Timetable
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <div class="studio-page-footer-nav">
+              <button type="button" class="btn btn-secondary" data-nav-view="timetable">
+                ← Back: Timetable Grid
+              </button>
+              <button type="button" class="btn btn-primary" data-nav-view="register-resources">
+                Next: Register New Resources →
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             PAGE 4: REGISTER NEW RESOURCES (#view-register-resources)
+             ========================================================= -->
+        <section id="view-register-resources" class="view-section">
+          <div class="studio-feature-card">
+            <div class="cloud-page-header-row">
+              <div>
+                <span class="section-eyebrow">WORKSPACE 04 • RESOURCE ONBOARDING</span>
+                <h2>➕ Register New College Resources</h2>
+                <p>Add new Faculty members, Subjects/Courses (Semesters S1–S8), Classrooms/Labs, or Student Batches to the master database.</p>
+              </div>
+              <button type="button" class="btn btn-primary" data-nav-view="builder">
+                ✏️ Go to Add Class
+              </button>
+            </div>
+
+            <div id="quickAddResourcesPanel" class="quick-add-drawer" style="display: block; margin: 0; border: none; padding: 0; background: transparent;">
+              <div class="quick-add-grid">
+                <!-- 1. Add New Faculty -->
+                <form id="quickAddFacultyForm" class="quick-add-card qa-card-blue">
+                  <div class="qa-card-title">👨‍🏫 1. Register Faculty (Teacher)</div>
+                  <input type="text" id="qaFacultyName" class="input-field" placeholder="Faculty Name (e.g. Dr. R. Krishnan)" required />
+                  <div class="qa-row">
+                    <select id="qaFacultyDept" class="preset-select" style="flex: 1;"></select>
+                    <input type="text" id="qaFacultySpec" class="input-field" placeholder="Specialization" style="flex: 1;" />
+                  </div>
+                  <button type="submit" class="btn btn-primary qa-submit-btn">＋ Add Faculty</button>
+                </form>
+
+                <!-- 2. Add New Subject (with Semester) -->
+                <form id="quickAddCourseForm" class="quick-add-card qa-card-purple">
+                  <div class="qa-card-title">📚 2. Register Subject / Course</div>
+                  <input type="text" id="qaCourseName" class="input-field" placeholder="Course Title (e.g. Robotics Lab)" required />
+                  <div class="qa-row">
+                    <select id="qaCourseDept" class="preset-select" style="flex: 1;"></select>
+                    <select id="qaCourseSem" class="preset-select" style="width: 68px; flex: none;">
+                      <option value="1">S1</option>
+                      <option value="2">S2</option>
+                      <option value="3" selected>S3</option>
+                      <option value="4">S4</option>
+                      <option value="5">S5</option>
+                      <option value="6">S6</option>
+                      <option value="7">S7</option>
+                      <option value="8">S8</option>
+                    </select>
+                    <select id="qaCourseType" class="preset-select" style="width: 92px; flex: none;">
+                      <option value="LECTURE">Lecture</option>
+                      <option value="COMPUTER_LAB">Lab</option>
+                    </select>
+                  </div>
+                  <button type="submit" class="btn btn-primary qa-submit-btn">＋ Add Subject</button>
+                </form>
+
+                <!-- 3. Add New Classroom / Lab -->
+                <form id="quickAddRoomForm" class="quick-add-card qa-card-emerald">
+                  <div class="qa-card-title">🏫 3. Register Classroom / Lab</div>
+                  <input type="text" id="qaRoomName" class="input-field" placeholder="Room Name (e.g. Robotics Lab 1)" required />
+                  <div class="qa-row">
+                    <input type="number" id="qaRoomCap" class="input-field" placeholder="Seats" value="60" style="width: 85px; flex: none;" required />
+                    <select id="qaRoomType" class="preset-select" style="flex: 1;">
+                      <option value="LECTURE">Lecture Hall</option>
+                      <option value="COMPUTER_LAB">Computer/Engg Lab</option>
+                    </select>
+                  </div>
+                  <button type="submit" class="btn btn-primary qa-submit-btn">＋ Add Room / Lab</button>
+                </form>
+
+                <!-- 4. Add New Student Batch & Semester -->
+                <form id="quickAddBatchForm" class="quick-add-card qa-card-amber">
+                  <div class="qa-card-title">🎓 4. Register Student Batch</div>
+                  <input type="text" id="qaBatchName" class="input-field" placeholder="Batch Name (e.g. CSE - S4 Batch)" required />
+                  <div class="qa-row">
+                    <input type="text" id="qaCustomDept" class="input-field" placeholder="Dept (e.g. CSE)" style="flex: 1;" />
+                    <select id="qaBatchSem" class="preset-select" style="width: 68px; flex: none;">
+                      <option value="1">S1</option>
+                      <option value="2">S2</option>
+                      <option value="3" selected>S3</option>
+                      <option value="4">S4</option>
+                      <option value="5">S5</option>
+                      <option value="6">S6</option>
+                      <option value="7">S7</option>
+                      <option value="8">S8</option>
+                    </select>
+                    <input type="number" id="qaBatchSize" class="input-field" placeholder="Size" value="60" style="width: 70px; flex: none;" required />
+                  </div>
+                  <button type="submit" class="btn btn-primary qa-submit-btn">＋ Add Batch &amp; Dept</button>
+                </form>
+              </div>
+            </div>
+
+            <div class="studio-page-footer-nav">
+              <button type="button" class="btn btn-secondary" data-nav-view="builder">
+                ← Back: Add Class
+              </button>
+              <button type="button" class="btn btn-primary" data-nav-view="departments">
+                Next: Academic Departments →
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             PAGE 5: ACADEMIC DEPARTMENTS (#view-departments)
+             ========================================================= -->
+        <section id="view-departments" class="view-section">
+          <div class="studio-feature-card">
+            <div class="cloud-page-header-row">
+              <div>
+                <span class="section-eyebrow">WORKSPACE 05 • ACADEMIC DEPARTMENTS</span>
+                <h2>🎓 College Departments Portal (Semesters S1–S8)</h2>
+                <p>Click any department card below to open the Weekly Schedule Grid filtered to that department.</p>
+              </div>
+            </div>
+
+            <div class="home-dept-grid" id="homeDepartmentsGrid"></div>
+
+            <div class="studio-page-footer-nav">
+              <button type="button" class="btn btn-secondary" data-nav-view="register-resources">
+                ← Back: Register Resources
+              </button>
+              <button type="button" class="btn btn-primary" data-nav-view="conflicts">
+                Next: Detected Clashes →
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             PAGE 6: DETECTED CONFLICTS (#view-conflicts)
+             ========================================================= -->
+        <section id="view-conflicts" class="view-section">
+          <div class="studio-feature-card">
+            <div class="cloud-page-header-row">
+              <div>
+                <span class="section-eyebrow">WORKSPACE 06 • CLASH RADAR</span>
+                <h2>🚨 Detected Campus Conflicts (<span id="tabConflictCount">0</span>)</h2>
+                <p>Real-time constraint verification across Faculty, Classrooms, Labs, Capacities, and Student Batches.</p>
+              </div>
+              <div style="display: flex; gap: 0.6rem;">
+                <button type="button" class="btn btn-primary" data-nav-view="fix-plan">
+                  🔧 View Before → After Fix Plan
+                </button>
+              </div>
+            </div>
+
+            <div id="tabPanelConflicts"></div>
+
+            <div class="studio-page-footer-nav">
+              <button type="button" class="btn btn-secondary" data-nav-view="departments">
+                ← Back: Departments
+              </button>
+              <button type="button" class="btn btn-primary" data-nav-view="fix-plan">
+                Next: AI Fix Plan →
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             PAGE 7: BEFORE -> AFTER AI FIX PLAN (#view-fix-plan)
+             ========================================================= -->
+        <section id="view-fix-plan" class="view-section">
+          <div class="studio-feature-card">
+            <div class="cloud-page-header-row">
+              <div>
+                <span class="section-eyebrow">WORKSPACE 07 • AUTOMATED RESOLUTION</span>
+                <h2 id="diffSectionTitle">🔧 AI Fix Plan (Before → After)</h2>
+                <p id="diffSectionSubtitle">Exact time slot and room reassignments computed by the AI Solver across all departments.</p>
+              </div>
+              <button id="btnApplyDiff" class="btn btn-primary btn-glow">
+                ✨ Apply AI Fixes Now
+              </button>
+            </div>
+
+            <div id="diffListContainer"></div>
+
+            <div class="studio-page-footer-nav">
+              <button type="button" class="btn btn-secondary" data-nav-view="conflicts">
+                ← Back: Detected Clashes
+              </button>
+              <button type="button" class="btn btn-primary" data-nav-view="graph">
+                Next: Conflict Network Graph →
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             PAGE 8: VISUAL CONFLICT GRAPH (#view-graph)
+             ========================================================= -->
+        <section id="view-graph" class="view-section">
+          <div class="studio-feature-card">
+            <div class="cloud-page-header-row">
+              <div>
+                <span class="section-eyebrow">WORKSPACE 08 • TOPOLOGY VISUALIZATION</span>
+                <h2>🕸️ Whole-College Conflict Network Graph</h2>
+                <p>Interactive topology showing resource collisions across scheduled classes, faculty, rooms, and batches.</p>
+              </div>
+            </div>
+
+            <div
+              id="conflictGraphContainer"
+              class="conflict-graph-stage"
+              style="min-height: 440px;"
+            ></div>
+            <div class="graph-legend">
+              <span class="legend-item">🔴 Shared Faculty Clash</span>
+              <span class="legend-item">🟠 Shared Room / Lab Clash</span>
+              <span class="legend-item">🟣 Student Batch Clash</span>
+              <span class="legend-item">🟢 Conflict-Free Session</span>
+            </div>
+
+            <div class="studio-page-footer-nav">
+              <button type="button" class="btn btn-secondary" data-nav-view="fix-plan">
+                ← Back: AI Fix Plan
+              </button>
+              <button type="button" class="btn btn-primary" data-nav-view="ai-assistant">
+                Next: AI Chat Assistant →
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             PAGE 9: AI CHAT ASSISTANT (#view-ai-assistant)
+             ========================================================= -->
+        <section id="view-ai-assistant" class="view-section">
+          <div class="studio-feature-card">
+            <div class="cloud-page-header-row">
+              <div>
+                <span class="section-eyebrow">WORKSPACE 09 • CONVERSATIONAL AI</span>
+                <h2>🤖 CampusQ AI Chat Assistant</h2>
+                <p>Ask questions about any department, semester (S1–S8), faculty member, lab mismatch, or conflict resolution plan.</p>
+              </div>
+              <button type="button" class="btn btn-secondary" data-nav-view="ai-summary">
+                ⚡ Open AI Executive Report
+              </button>
+            </div>
+
+            <div class="quick-prompts" style="margin-bottom: 1rem;">
+              <button class="chip-btn" data-prompt="Explain my current timetable conflicts simply">
+                Explain all conflicts
+              </button>
+              <button class="chip-btn" data-prompt="Why is Prof. Rahul Sharma conflicted across CSE and IT?">
+                Prof. Rahul Sharma
+              </button>
+              <button class="chip-btn" data-prompt="Why are the Labs having a room mismatch?">
+                Lab room mismatches
+              </button>
+              <button class="chip-btn" data-prompt="Show CSE department schedule">
+                CSE Schedule
+              </button>
+              <button class="chip-btn" data-prompt="Which classrooms and labs are free?">
+                Free Rooms &amp; Labs
+              </button>
+              <button class="chip-btn" data-prompt="Fix all conflicts">
+                Fix all conflicts
+              </button>
+            </div>
+
+            <div class="chat-messages" id="chatMessages" style="min-height: 340px; max-height: 480px;">
+              <div class="chat-bubble assistant">
+                Hi! Ask me about any department, semester, faculty member, classroom, lab, or student batch conflict across the college—or click a quick topic above.
+              </div>
+            </div>
+
+            <form id="chatForm" class="chat-input-row">
+              <input
+                type="text"
+                id="chatInput"
+                class="input-field"
+                placeholder="Ask about any department, faculty, semester (S1-S8), or type 'Fix conflicts'..."
+                autocomplete="off"
+              />
+              <button type="submit" class="btn btn-primary">Send</button>
+            </form>
+
+            <div class="studio-page-footer-nav">
+              <button type="button" class="btn btn-secondary" data-nav-view="graph">
+                ← Back: Conflict Graph
+              </button>
+              <button type="button" class="btn btn-primary" data-nav-view="ai-summary">
+                Next: AI Executive Report →
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             PAGE 10: AI EXECUTIVE REPORT (#view-ai-summary)
+             ========================================================= -->
+        <section id="view-ai-summary" class="view-section">
+          <div class="studio-feature-card">
+            <div class="cloud-page-header-row">
+              <div>
+                <span class="section-eyebrow">WORKSPACE 10 • EXECUTIVE DIAGNOSTIC</span>
+                <h2>⚡ AI Timetable Executive Report</h2>
+                <p>Generate a comprehensive natural-language root-cause report of all cross-department clashes and solver recommendations.</p>
+              </div>
+              <button id="btnRunAiAnalysis" class="btn btn-qualcomm">
+                ⚡ Generate AI Report
+              </button>
+            </div>
+
+            <div class="ai-box" style="margin-top: 0.5rem;">
+              <div id="aiAnalysisOutput" class="ai-narrative" style="min-height: 180px;">
+                Click "⚡ Generate AI Report" in the top-right to generate a complete executive diagnostic of your current college timetable.
+              </div>
+            </div>
+
+            <div class="studio-page-footer-nav">
+              <button type="button" class="btn btn-secondary" data-nav-view="ai-assistant">
+                ← Back: AI Chat Assistant
+              </button>
+              <button type="button" class="btn btn-primary" data-nav-view="dir-faculty">
+                Next: Faculty Directory →
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             PAGE 11: FACULTY DIRECTORY (#view-dir-faculty)
+             ========================================================= -->
+        <section id="view-dir-faculty" class="view-section">
+          <div class="studio-feature-card">
+            <div class="cloud-page-header-row">
+              <div>
+                <span class="section-eyebrow">WORKSPACE 11 • FACULTY DATABASE</span>
+                <h2>👨‍🏫 College Faculty Directory</h2>
+                <p>Click any faculty member to open their filtered weekly timetable, or add a new faculty member below.</p>
+              </div>
+              <span class="pill-tag pill-info" id="dirFacultyCountBadge">18 Faculty</span>
+            </div>
+
+            <div class="resource-list" id="facultyDirectoryPills" style="max-height: none;"></div>
+            <form id="addFacultyForm" class="inline-add-box" style="margin-top: 1.25rem;">
+              <input type="text" id="newFacultyName" class="input-field" placeholder="Teacher Name (e.g. Dr. Nair)..." style="flex: 1.2;" required />
+              <select id="newFacultyDept" class="preset-select" style="width: 140px; flex: none;"></select>
+              <button type="submit" class="btn btn-primary">＋ Add Faculty</button>
+            </form>
+
+            <div class="studio-page-footer-nav">
+              <button type="button" class="btn btn-secondary" data-nav-view="ai-summary">
+                ← Back: AI Executive Report
+              </button>
+              <button type="button" class="btn btn-primary" data-nav-view="dir-rooms">
+                Next: Classrooms &amp; Labs →
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             PAGE 12: CLASSROOMS & LABS DIRECTORY (#view-dir-rooms)
+             ========================================================= -->
+        <section id="view-dir-rooms" class="view-section">
+          <div class="studio-feature-card">
+            <div class="cloud-page-header-row">
+              <div>
+                <span class="section-eyebrow">WORKSPACE 12 • INFRASTRUCTURE DATABASE</span>
+                <h2>🏫 Classrooms &amp; Engineering Labs Directory</h2>
+                <p>Click any classroom or lab to inspect its scheduled classes, or register a new room below.</p>
+              </div>
+              <span class="pill-tag pill-success" id="dirRoomCountBadge">12 Rooms</span>
+            </div>
+
+            <div class="resource-list" id="roomDirectoryPills" style="max-height: none;"></div>
+            <form id="addRoomForm" class="inline-add-box" style="margin-top: 1.25rem;">
+              <input type="text" id="newRoomName" class="input-field" placeholder="Room/Lab Name (e.g. Room 401)" style="flex: 1.2;" required />
+              <input type="number" id="newRoomCap" class="input-field" placeholder="Seats" value="60" style="width: 90px; flex: none;" required />
+              <select id="newRoomType" class="preset-select" style="width: 140px; flex: none;">
+                <option value="LECTURE">Lecture Hall</option>
+                <option value="COMPUTER_LAB">Lab</option>
+              </select>
+              <button type="submit" class="btn btn-primary">＋ Add Room</button>
+            </form>
+
+            <div class="studio-page-footer-nav">
+              <button type="button" class="btn btn-secondary" data-nav-view="dir-faculty">
+                ← Back: Faculty Directory
+              </button>
+              <button type="button" class="btn btn-primary" data-nav-view="dir-batches">
+                Next: Student Batches →
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             PAGE 13: STUDENT BATCHES DIRECTORY (#view-dir-batches)
+             ========================================================= -->
+        <section id="view-dir-batches" class="view-section">
+          <div class="studio-feature-card">
+            <div class="cloud-page-header-row">
+              <div>
+                <span class="section-eyebrow">WORKSPACE 13 • COHORT DATABASE</span>
+                <h2>👥 Student Batches Directory (Semesters S1–S8)</h2>
+                <p>Click any student batch to view its weekly schedule, or register a new batch below.</p>
+              </div>
+              <span class="pill-tag pill-info" id="dirBatchCountBadge">9 Batches</span>
+            </div>
+
+            <div class="resource-list" id="batchDirectoryPills" style="max-height: none;"></div>
+            <form id="addBatchForm" class="inline-add-box" style="margin-top: 1.25rem;">
+              <input type="text" id="newBatchName" class="input-field" placeholder="Batch (e.g. ME - S5 Batch)" style="flex: 1.2;" required />
+              <select id="newBatchDept" class="preset-select" style="width: 120px; flex: none;"></select>
+              <input type="number" id="newBatchSize" class="input-field" placeholder="Size" value="60" style="width: 90px; flex: none;" required />
+              <button type="submit" class="btn btn-primary">＋ Add Batch</button>
+            </form>
+
+            <div class="studio-page-footer-nav">
+              <button type="button" class="btn btn-secondary" data-nav-view="dir-rooms">
+                ← Back: Classrooms &amp; Labs
+              </button>
+              <button type="button" class="btn btn-primary" data-nav-view="scenarios">
+                Next: Presets &amp; Export →
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             PAGE 14: DEMO TEST CASES & EXPORT (#view-scenarios)
+             ========================================================= -->
+        <section id="view-scenarios" class="view-section">
+          <div class="studio-feature-card">
+            <div class="cloud-page-header-row">
+              <div>
+                <span class="section-eyebrow">LIVE PRESENTATION &amp; QA VERIFICATION SUITE</span>
+                <h2>🧪 Interactive Demo Test Cases</h2>
+                <p>Click any test case below during your presentation to inject specific scheduling conflicts, verify real-time clash detection, and watch the AI Solver fix them.</p>
+              </div>
+              <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+                <button type="button" class="btn btn-secondary" id="navExportCsvBtn">
+                  📥 Export CSV
+                </button>
+                <button type="button" class="btn btn-secondary" id="navPrintPdfBtn">
+                  🖨️ Print PDF
+                </button>
+              </div>
+            </div>
+
+            <div class="testcase-suite-grid">
+              <!-- TEST CASE 1: FACULTY DOUBLE-BOOKING -->
+              <div class="testcase-card">
+                <div class="testcase-header">
+                  <span class="pill-tag pill-danger">TEST CASE 01</span>
+                  <span class="pill-tag pill-info">👨‍🏫 Faculty Constraint</span>
+                </div>
+                <h3>Cross-Department Faculty Double-Booking</h3>
+                <p class="testcase-desc">
+                  <strong>Input:</strong> Prof. Rahul Sharma is assigned to teach <em>Python Programming (CSE S1)</em>, <em>Python Lab (IT S1)</em>, and <em>Data Structures (CSE S3)</em> all at <strong>Monday 09:00–10:00</strong>.
+                </p>
+                <div class="testcase-expectations">
+                  <div><strong>🚨 Expected Detection:</strong> <code>FACULTY_DOUBLE_BOOKING</code> (3 simultaneous classes for 1 teacher).</div>
+                  <div><strong>✨ Expected AI Fix:</strong> Relocates 2 of the classes to free slots (<code>Mon 10:00</code> &amp; <code>Mon 11:00</code>).</div>
+                </div>
+                <div class="testcase-actions">
+                  <button type="button" class="btn btn-secondary btn-sm" data-nav-preset="tc-faculty-clash">
+                    ▶️ Load &amp; View Clashes
+                  </button>
+                  <button type="button" class="btn btn-primary btn-sm" data-run-testcase-fix="tc-faculty-clash">
+                    ✨ Load &amp; Auto-Fix
+                  </button>
+                </div>
+              </div>
+
+              <!-- TEST CASE 2: ROOM DOUBLE-BOOKING & CAPACITY -->
+              <div class="testcase-card">
+                <div class="testcase-header">
+                  <span class="pill-tag pill-danger">TEST CASE 02</span>
+                  <span class="pill-tag pill-info">🏫 Room &amp; Capacity</span>
+                </div>
+                <h3>Room Double-Booking &amp; Seat Overflow</h3>
+                <p class="testcase-desc">
+                  <strong>Input:</strong> Two 60-student cohorts (<em>CSE S1</em> &amp; <em>AI&amp;DS S5</em>) are both booked into <strong>Room 101 (50 seats)</strong> at <strong>Tuesday 09:00–10:00</strong>, plus a 65-student ME batch in a 60-seat hall.
+                </p>
+                <div class="testcase-expectations">
+                  <div><strong>🚨 Expected Detection:</strong> <code>CLASSROOM_DOUBLE_BOOKING</code> + 3 <code>CLASSROOM_CAPACITY_EXCEEDED</code> alerts.</div>
+                  <div><strong>✨ Expected AI Fix:</strong> Moves cohorts into 65–120 seat halls (<code>Room 102</code>, <code>Room 301</code>, <code>Main Auditorium</code>).</div>
+                </div>
+                <div class="testcase-actions">
+                  <button type="button" class="btn btn-secondary btn-sm" data-nav-preset="tc-room-capacity">
+                    ▶️ Load &amp; View Clashes
+                  </button>
+                  <button type="button" class="btn btn-primary btn-sm" data-run-testcase-fix="tc-room-capacity">
+                    ✨ Load &amp; Auto-Fix
+                  </button>
+                </div>
+              </div>
+
+              <!-- TEST CASE 3: LAB FACILITY MISMATCH -->
+              <div class="testcase-card">
+                <div class="testcase-header">
+                  <span class="pill-tag pill-danger">TEST CASE 03</span>
+                  <span class="pill-tag pill-info">💻 Lab Equipment</span>
+                </div>
+                <h3>Engineering &amp; Computer Lab Mismatch</h3>
+                <p class="testcase-desc">
+                  <strong>Input:</strong> Three practical lab sessions (<em>Web Dev Lab - CSE</em>, <em>CAD/CAM Lab - ME</em>, and <em>Embedded Lab - ECE</em>) are scheduled in regular <strong>Lecture Halls</strong> on Wednesday.
+                </p>
+                <div class="testcase-expectations">
+                  <div><strong>🚨 Expected Detection:</strong> 3 <code>CLASSROOM_TYPE_MISMATCH</code> alerts (Lab course in Lecture room).</div>
+                  <div><strong>✨ Expected AI Fix:</strong> Reassigns each lab to a 65-seat <code>COMPUTER_LAB</code> (<code>Computer Lab 2</code>, <code>CAD/CAM Lab</code>, <code>VLSI Lab</code>).</div>
+                </div>
+                <div class="testcase-actions">
+                  <button type="button" class="btn btn-secondary btn-sm" data-nav-preset="tc-lab-mismatch">
+                    ▶️ Load &amp; View Clashes
+                  </button>
+                  <button type="button" class="btn btn-primary btn-sm" data-run-testcase-fix="tc-lab-mismatch">
+                    ✨ Load &amp; Auto-Fix
+                  </button>
+                </div>
+              </div>
+
+              <!-- TEST CASE 4: STUDENT BATCH CLASH -->
+              <div class="testcase-card">
+                <div class="testcase-header">
+                  <span class="pill-tag pill-danger">TEST CASE 04</span>
+                  <span class="pill-tag pill-info">🎓 Student Cohort</span>
+                </div>
+                <h3>Student Batch Simultaneous Class Clash</h3>
+                <p class="testcase-desc">
+                  <strong>Input:</strong> The <strong>CSE - S3 (2nd Year)</strong> student batch is scheduled to attend <em>DBMS</em>, <em>Operating Systems</em>, and <em>Data Structures</em> all at <strong>Thursday 09:00–10:00</strong>.
+                </p>
+                <div class="testcase-expectations">
+                  <div><strong>🚨 Expected Detection:</strong> <code>STUDENT_BATCH_DOUBLE_BOOKING</code> (same cohort in 3 rooms at once).</div>
+                  <div><strong>✨ Expected AI Fix:</strong> Staggers the 3 classes across <code>Thu 09:00</code>, <code>Thu 10:00</code>, and <code>Thu 11:00</code>.</div>
+                </div>
+                <div class="testcase-actions">
+                  <button type="button" class="btn btn-secondary btn-sm" data-nav-preset="tc-batch-clash">
+                    ▶️ Load &amp; View Clashes
+                  </button>
+                  <button type="button" class="btn btn-primary btn-sm" data-run-testcase-fix="tc-batch-clash">
+                    ✨ Load &amp; Auto-Fix
+                  </button>
+                </div>
+              </div>
+
+              <!-- TEST CASE 5: WHOLE COLLEGE STRESS TEST -->
+              <div class="testcase-card">
+                <div class="testcase-header">
+                  <span class="pill-tag pill-danger">TEST CASE 05</span>
+                  <span class="pill-tag pill-info">🏛️ 9-Dept Stress Test</span>
+                </div>
+                <h3>Whole-College Multi-Department Clash Suite</h3>
+                <p class="testcase-desc">
+                  <strong>Input:</strong> Full 20-class schedule across <strong>CSE, IT, AI&amp;DS, ECE, EEE, ME, CE, BT &amp; MBS</strong> with combined teacher, room, capacity, lab, and batch clashes.
+                </p>
+                <div class="testcase-expectations">
+                  <div><strong>🚨 Expected Detection:</strong> 6 multi-department clashes (Campus Health drops to <code>40%</code>).</div>
+                  <div><strong>✨ Expected AI Fix:</strong> Resolves all 6 clashes in 4 moves, restoring Campus Health to <code>100%</code>.</div>
+                </div>
+                <div class="testcase-actions">
+                  <button type="button" class="btn btn-secondary btn-sm" data-nav-preset="whole-college-conflict">
+                    ▶️ Load &amp; View Clashes
+                  </button>
+                  <button type="button" class="btn btn-primary btn-sm" data-run-testcase-fix="whole-college-conflict">
+                    ✨ Load &amp; Auto-Fix
+                  </button>
+                </div>
+              </div>
+
+              <!-- TEST CASE 6: CLEAN BASELINE & CUSTOM EMPTY -->
+              <div class="testcase-card">
+                <div class="testcase-header">
+                  <span class="pill-tag pill-success">TEST CASE 06</span>
+                  <span class="pill-tag pill-info">✅ Baseline / Custom</span>
+                </div>
+                <h3>100% Conflict-Free Baseline &amp; Custom Builder</h3>
+                <p class="testcase-desc">
+                  <strong>Input:</strong> Load the pre-verified 100% optimal whole-college schedule, or clear the grid to test adding your own custom classes from scratch.
+                </p>
+                <div class="testcase-expectations">
+                  <div><strong>🚨 Expected Detection:</strong> <code>0 Clashes</code> (<code>100% Health Score</code> verified across all 5 constraints).</div>
+                  <div><strong>✨ Custom Input:</strong> Or click <em>Start Empty</em> to demo manual class entry live.</div>
+                </div>
+                <div class="testcase-actions">
+                  <button type="button" class="btn btn-secondary btn-sm" data-nav-preset="clean-optimized">
+                    ✅ Load 100% Optimal
+                  </button>
+                  <button type="button" class="btn btn-danger-outline btn-sm" data-nav-preset="empty">
+                    🧹 Start Empty Grid
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="studio-page-footer-nav">
+              <button type="button" class="btn btn-secondary" data-nav-view="home">
+                ← Back: Overview
+              </button>
+              <button type="button" class="btn btn-primary" data-nav-view="timetable">
+                Next: Weekly Timetable Grid →
+              </button>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- MODAL: Edit Existing Class Session -->
+    <div class="modal-backdrop" id="sessionModal">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 id="sessionModalTitle" style="font-size: 1.05rem;">Edit Scheduled Class</h3>
+          <button class="btn btn-secondary" id="btnCloseSessionModal" style="padding: 0.25rem 0.6rem;">✕</button>
+        </div>
+        <form id="sessionForm">
+          <div class="modal-body">
+            <input type="hidden" id="formSessionId" />
+
+            <div class="form-group">
+              <label for="formCourseId">Subject</label>
+              <select id="formCourseId" class="preset-select" required></select>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem;">
+              <div class="form-group">
+                <label for="formFacultyId">Teacher (Faculty)</label>
+                <select id="formFacultyId" class="preset-select" required></select>
+              </div>
+              <div class="form-group">
+                <label for="formBatchId">Student Batch</label>
+                <select id="formBatchId" class="preset-select" required></select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="formRoomId">Classroom / Lab</label>
+              <select id="formRoomId" class="preset-select" required></select>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem;">
+              <div class="form-group">
+                <label for="formDay">Day</label>
+                <select id="formDay" class="preset-select" required></select>
+              </div>
+              <div class="form-group">
+                <label for="formSlot">Time Slot</label>
+                <select id="formSlot" class="preset-select" required></select>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" id="btnDeleteSession" class="btn btn-secondary" style="color: #dc2626; border-color: rgba(239,68,68,0.35); display: none;">
+              🗑 Remove Class
+            </button>
+            <div style="display: flex; gap: 0.5rem; margin-left: auto;">
+              <button type="button" id="btnCancelSession" class="btn btn-secondary">Cancel</button>
+              <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "name": "college-timetable-optimizer",
+  "version": "1.0.0",
+  "description": "AI-Powered College Timetable Optimizer & Conflict Detection System with Qualcomm AI Integration",
+  "type": "module",
+  "main": "backend/src/server.js",
+  "scripts": {
+    "start": "node backend/src/server.js",
+    "dev": "node --watch backend/src/server.js",
+    "test": "node --test backend/tests/engine.test.js"
+  },
+  "keywords": [
+    "timetable-optimizer",
+    "constraint-satisfaction",
+    "graph-coloring",
+    "qualcomm-ai",
+    "college-scheduling"
+  ],
+  "author": "Antigravity Engineering",
+  "license": "MIT"
+}
